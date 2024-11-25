@@ -4,26 +4,43 @@ import Flutter
 
 @UIApplicationMain
 @objc class AppDelegate: FlutterAppDelegate {
+var field =UITextField()
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+
     self.window.makeSecure() // + add this line
+
     GeneratedPluginRegistrant.register(with: self)
+    #if !DEBUG
+     addSecuredView()
+    #endif
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 }
 
 // +  add this section
+override func applicationWillResignActive(_ application: UIApplication) {
+        field.isSecureTextEntry = false
+    }
 
-extension UIWindow {
-func makeSecure() {
-    let field = UITextField()
-    field.isSecureTextEntry = true
-    self.addSubview(field)
-    field.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-    field.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-    self.layer.superlayer?.addSublayer(field.layer)
-    field.layer.sublayers?.first?.addSublayer(self.layer)
-  }
-}
+    override func applicationDidBecomeActive(
+      _ application: UIApplication
+    ) {
+        field.isSecureTextEntry = true
+    }
+
+    private func addSecuredView() {
+        if (!window.subviews.contains(field)) {
+            window.addSubview(field)
+            field.centerYAnchor.constraint(equalTo: window.centerYAnchor).isActive = true
+            field.centerXAnchor.constraint(equalTo: window.centerXAnchor).isActive = true
+            window.layer.superlayer?.addSublayer(field.layer)
+            if #available(iOS 17.0, *) {
+              field.layer.sublayers?.last?.addSublayer(window.layer)
+            } else {
+              field.layer.sublayers?.first?.addSublayer(window.layer)
+            }
+        }
+    }
